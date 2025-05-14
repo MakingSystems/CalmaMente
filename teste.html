@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teste Emocional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('fundo_site_teste.jpg');
+      background-color: rgb(0, 0, 0);
+      background-size: 101%;
+      background-repeat: repeat;
+      color: rgb(255, 255, 255);
+      text-align: center;
+    }
+
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 120px;
+      height: auto;
+    }
+
+    h1 {
+      margin-top: 120px;
+      font-size: 2.5rem;
+    }
+
+    .explicacao {
+      max-width: 800px;
+      margin: 20px auto;
+      font-size: 1.1rem;
+      color: #f0f0f0;
+    }
+
+    #pergunta-container {
+      margin: 40px auto;
+      max-width: 600px;
+    }
+
+    #pergunta {
+      font-size: 1.3rem;
+      margin-bottom: 30px;
+    }
+
+    .opcoes {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .opcoes button {
+      display: block;
+      width: 25%;
+      margin: 10px 0;
+      padding: 15px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #ff007f;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .opcoes button:hover {
+      box-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f;
+      transform: scale(1.05);
+    }
+
+    #voltar-btn {
+      margin-top: 20px;
+      background-color: #a3a3a3;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: none;
+    }
+
+    #voltar-btn:hover {
+      box-shadow: 0 0 15px #999;
+      transform: scale(1.05);
+    }
+
+    #resultado {
+      margin-top: 60px;
+      font-size: 1.5rem;
+      color: #ffd1ec;
+      display: none;
+    }
+
+    #resultado a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      background-color: #ff007f;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    #resultado a:hover {
+      background-color: #e6006f;
+      box-shadow: 0 0 15px #ff007f;
+    }
+  </style>
+</head>
+<body>
+  <img src="sua-logo.png" alt="Logo" class="logo">
+
+  <h1>Teste Emocional</h1>
+
+  <p class="explicacao">
+    Este teste é apenas uma ferramenta inicial de autoconhecimento e não substitui uma avaliação profissional. Use os resultados como ponto de reflexão e, se necessário, procure ajuda especializada.
+  </p>
+
+  <div id="pergunta-container">
+    <div id="pergunta"></div>
+    <div class="opcoes">
+      <button onclick="responder(1)">Sim</button>
+      <button onclick="responder(0)">Não</button>
+    </div>
+    <button id="voltar-btn" onclick="voltar()">Voltar</button>
+  </div>
+
+  <div id="resultado"></div>
+
+  <script>
+    const perguntas = [
+      { texto: "Você se sente nervoso(a), preocupado(a) ou inquieto(a) com frequência sem motivo claro?", transtorno: "Ansiedade" },
+      { texto: "Você tem dificuldade para relaxar ou desligar os pensamentos mesmo quando está descansando?", transtorno: "Ansiedade" },
+      { texto: "Você sente que algo ruim pode acontecer mesmo quando tudo parece bem?", transtorno: "Ansiedade" },
+      { texto: "Você sente que seu coração acelera ou sua respiração fica mais rápida em situações comuns?", transtorno: "Ansiedade" },
+      { texto: "Você evita lugares ou situações por medo de se sentir ansioso(a)?", transtorno: "Ansiedade" },
+      { texto: "Você sente tensão constante no corpo, como se estivesse sempre alerta?", transtorno: "Ansiedade" },
+      { texto: "Você se sente triste ou vazio(a) a maior parte dos dias?", transtorno: "Depressão" },
+      { texto: "Você perdeu o interesse por coisas que antes gostava muito?", transtorno: "Depressão" },
+      { texto: "Você se sente cansado(a) mesmo dormindo bem?", transtorno: "Depressão" },
+      { texto: "Você tem dificuldade de se concentrar em tarefas simples?", transtorno: "Depressão" },
+      { texto: "Você sente que não é importante ou tem pensamentos negativos sobre si mesmo(a)?", transtorno: "Depressão" },
+      { texto: "Você já pensou em desistir ou sentiu que sua vida não vale a pena?", transtorno: "Depressão" },
+      { texto: "Você tem dificuldade de manter a atenção em uma única tarefa por muito tempo?", transtorno: "TDAH" },
+      { texto: "Você se distrai facilmente com sons, objetos ou pensamentos?", transtorno: "TDAH" },
+      { texto: "Você costuma esquecer compromissos ou perder objetos importantes com frequência?", transtorno: "TDAH" },
+      { texto: "Você age por impulso, sem pensar nas consequências?", transtorno: "TDAH" },
+      { texto: "Você sente que sua mente está sempre acelerada ou bagunçada?", transtorno: "TDAH" },
+      { texto: "Você tem dificuldade de organizar tarefas ou seguir passos de forma ordenada?", transtorno: "TDAH" },
+      { texto: "Você muda de humor com facilidade, indo do entusiasmo à tristeza rapidamente?", transtorno: "Borderline" },
+      { texto: "Você sente medo intenso de ser abandonado(a), mesmo em situações pequenas?", transtorno: "Borderline" },
+      { texto: "Seus relacionamentos são intensos, mas instáveis?", transtorno: "Borderline" },
+      { texto: "Você tem dificuldade para controlar reações impulsivas ou agressivas?", transtorno: "Borderline" },
+      { texto: "Você sente que às vezes não sabe quem você é?", transtorno: "Borderline" },
+      { texto: "Você já teve comportamentos autodestrutivos, como se machucar ou se colocar em risco?", transtorno: "Borderline" },
+      { texto: "Você já teve momentos de energia extrema, seguidos por tristeza profunda?", transtorno: "Bipolaridade" },
+      { texto: "Você já se sentiu invencível ou com ideias grandiosas sem motivo aparente?", transtorno: "Bipolaridade" },
+      { texto: "Você já gastou dinheiro de forma impulsiva ou exagerada em certos períodos?", transtorno: "Bipolaridade" },
+      { texto: "Você tem alterações de sono, como dormir pouco ou demais dependendo da fase?", transtorno: "Bipolaridade" },
+      { texto: "Você sente que perde o controle do seu humor sem entender por quê?", transtorno: "Bipolaridade" },
+      { texto: "Você já teve momentos em que falava muito, rápido e pulava de assunto?", transtorno: "Bipolaridade" },
+      { texto: "Você sente necessidade de repetir ações ou pensamentos mesmo sabendo que não precisa?", transtorno: "TOC" },
+      { texto: "Você sente que algo ruim pode acontecer se não fizer uma certa ação?", transtorno: "TOC" },
+      { texto: "Você verifica repetidamente se fechou portas, desligou aparelhos etc.?", transtorno: "TOC" },
+      { texto: "Você sente que precisa seguir rituais para se sentir em paz?", transtorno: "TOC" },
+      { texto: "Seus pensamentos indesejados causam muito incômodo ou ansiedade?", transtorno: "TOC" },
+      { texto: "Você já perdeu muito tempo do dia por conta dessas ações repetitivas?", transtorno: "TOC" },
+      { texto: "Você sente medo de interagir com outras pessoas ou ser julgado(a)?", transtorno: "Fobia Social" },
+      { texto: "Você evita situações como apresentações, festas ou reuniões sociais?", transtorno: "Fobia Social" },
+      { texto: "Você sente sintomas físicos (tremores, suor, batimento acelerado) ao socializar?", transtorno: "Fobia Social" },
+      { texto: "Você se preocupa por dias antes de ter que falar com alguém ou aparecer em público?", transtorno: "Fobia Social" },
+      { texto: "Você prefere ficar em casa para evitar situações desconfortáveis com outros?", transtorno: "Fobia Social" },
+      { texto: "Você sente que todos estão te observando ou te julgando negativamente?", transtorno: "Fobia Social" },
+      { texto: "Você já teve alucinações (ouviu ou viu algo que outros não viram)?", transtorno: "Esquizofrenia" },
+      { texto: "Você já sentiu que pessoas conspiram contra você sem motivo concreto?", transtorno: "Esquizofrenia" },
+      { texto: "Você teve mudanças muito grandes no pensamento ou na forma de falar?", transtorno: "Esquizofrenia" },
+      { texto: "Você sente dificuldade de expressar emoções ou se isola com frequência?", transtorno: "Esquizofrenia" },
+      { texto: "Você tem ideias confusas ou acha difícil distinguir o que é real?", transtorno: "Esquizofrenia" },
+      { texto: "Você já teve episódios intensos de desconexão com a realidade?", transtorno: "Esquizofrenia" }
+    ];
+
+    let indice = 0;
+    let respostas = [];
+    let historico = [];
+
+    function embaralhar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function mostrarPergunta() {
+      if (indice < perguntas.length) {
+        document.getElementById('pergunta').innerText = perguntas[indice].texto;
+        document.getElementById('pergunta-container').style.display = 'block';
+        document.getElementById('resultado').style.display = 'none';
+        document.getElementById('voltar-btn').style.display = indice > 0 ? 'inline-block' : 'none';
+      } else {
+        mostrarResultado();
+      }
+    }
+
+    function responder(valor) {
+      respostas.push({ ...perguntas[indice], resposta: valor });
+      historico.push(indice);
+      indice++;
+      mostrarPergunta();
+    }
+
+    function voltar() {
+      if (historico.length > 0) {
+        indice = historico.pop();
+        respostas.pop();
+        mostrarPergunta();
+      }
+    }
+
+    function mostrarResultado() {
+      const pontos = {};
+
+      respostas.forEach(({ transtorno, resposta }) => {
+        if (!pontos[transtorno]) pontos[transtorno] = 0;
+        pontos[transtorno] += resposta;
+      });
+
+      const maiorPontuacao = Math.max(...Object.values(pontos));
+
+      const resultadoDiv = document.getElementById('resultado');
+      resultadoDiv.style.display = 'block';
+
+      document.getElementById('pergunta-container').style.display = 'none';
+
+      if (maiorPontuacao === 0) {
+        resultadoDiv.innerHTML = `<p>Parece que você está bem no momento. Continue se cuidando!</p>`;
+        return;
+      }
+
+      const transtornosMaisProvaveis = Object.keys(pontos).filter(t => pontos[t] === maiorPontuacao);
+
+      resultadoDiv.innerHTML = `<p>Você apresentou mais sinais de: <strong>${transtornosMaisProvaveis.join(", ")}</strong></p>` +
+        transtornosMaisProvaveis.map(t => `<a href="${t.toLowerCase().replace(' ', '-')}.html">Ver mais sobre ${t}</a>`).join("<br>");
+    }
+
+    // Início
+    embaralhar(perguntas);
+    mostrarPergunta();
+  </script>
+</body>
+</html>
