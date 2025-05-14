@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -113,6 +113,28 @@
       background-color: #e6006f;
       box-shadow: 0 0 15px #ff007f;
     }
+
+    #resultado-pagamento,
+    #liberacao {
+      display: none;
+      margin-top: 40px;
+    }
+
+    #liberacao button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #liberacao button:hover {
+      background-color: #3e8e41;
+      box-shadow: 0 0 10px #4CAF50;
+    }
   </style>
 </head>
 <body>
@@ -133,10 +155,25 @@
     <button id="voltar-btn" onclick="voltar()">Voltar</button>
   </div>
 
+  <div id="resultado-pagamento">
+    <p style="font-size: 18px;">
+      Para ver seu resultado, finalize com um pagamento seguro:
+    </p>
+    <a href="pagamento.html" target="_blank">
+      <button style="padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">
+        Pagar R$0,99
+      </button>
+    </a>
+  </div>
+
+  <div id="liberacao">
+    <button onclick="mostrarResultado()">Já fiz o Pix, ver resultado</button>
+  </div>
+
   <div id="resultado"></div>
 
   <script>
-    const perguntas = [
+    const perguntasOriginal = [
       { texto: "Você se sente nervoso(a), preocupado(a) ou inquieto(a) com frequência sem motivo claro?", transtorno: "Ansiedade" },
       { texto: "Você tem dificuldade para relaxar ou desligar os pensamentos mesmo quando está descansando?", transtorno: "Ansiedade" },
       { texto: "Você sente que algo ruim pode acontecer mesmo quando tudo parece bem?", transtorno: "Ansiedade" },
@@ -187,71 +224,75 @@
       { texto: "Você já teve episódios intensos de desconexão com a realidade?", transtorno: "Esquizofrenia" }
     ];
 
-    let indice = 0;
-    let respostas = [];
-    let historico = [];
+    // Embaralha as perguntas ao carregar
+    const perguntas = perguntasOriginal.sort(() => Math.random() - 0.5);
 
-    function embaralhar(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    let indiceAtual = 0;
+    let pontuacoes = {};
+
+    function responder(valor) {
+      const transtorno = perguntas[indiceAtual].transtorno;
+      if (!pontuacoes[transtorno]) pontuacoes[transtorno] = 0;
+      pontuacoes[transtorno] += valor;
+
+      indiceAtual++;
+      if (indiceAtual < perguntas.length) {
+        mostrarPergunta();
+      } else {
+        document.getElementById('pergunta-container').style.display = 'none';
+        document.getElementById('resultado-pagamento').style.display = 'block';
+        document.getElementById('liberacao').style.display = 'block';
       }
     }
 
     function mostrarPergunta() {
-      if (indice < perguntas.length) {
-        document.getElementById('pergunta').innerText = perguntas[indice].texto;
-        document.getElementById('pergunta-container').style.display = 'block';
-        document.getElementById('resultado').style.display = 'none';
-        document.getElementById('voltar-btn').style.display = indice > 0 ? 'inline-block' : 'none';
-      } else {
-        mostrarResultado();
-      }
-    }
-
-    function responder(valor) {
-      respostas.push({ ...perguntas[indice], resposta: valor });
-      historico.push(indice);
-      indice++;
-      mostrarPergunta();
+      document.getElementById('pergunta').textContent = perguntas[indiceAtual].texto;
     }
 
     function voltar() {
-      if (historico.length > 0) {
-        indice = historico.pop();
-        respostas.pop();
+      if (indiceAtual > 0) {
+        indiceAtual--;
         mostrarPergunta();
       }
     }
 
     function mostrarResultado() {
-      const pontos = {};
+      const senha = prompt("Digite a palavra-chave recebida após o Pix:");
+      if (senha === "liberar123") {
+        document.getElementById('resultado-pagamento').style.display = 'none';
+        document.getElementById('liberacao').style.display = 'none';
 
-      respostas.forEach(({ transtorno, resposta }) => {
-        if (!pontos[transtorno]) pontos[transtorno] = 0;
-        pontos[transtorno] += resposta;
-      });
+        const resultadoDiv = document.getElementById('resultado');
+        resultadoDiv.style.display = 'block';
 
-      const maiorPontuacao = Math.max(...Object.values(pontos));
+        let maiorPontuacao = 0;
+        let transtornosMaisProvaveis = [];
 
-      const resultadoDiv = document.getElementById('resultado');
-      resultadoDiv.style.display = 'block';
+        for (let transtorno in pontuacoes) {
+          if (pontuacoes[transtorno] > maiorPontuacao) {
+            maiorPontuacao = pontuacoes[transtorno];
+            transtornosMaisProvaveis = [transtorno];
+          } else if (pontuacoes[transtorno] === maiorPontuacao && maiorPontuacao > 0) {
+            transtornosMaisProvaveis.push(transtorno);
+          }
+        }
 
-      document.getElementById('pergunta-container').style.display = 'none';
-
-      if (maiorPontuacao === 0) {
-        resultadoDiv.innerHTML = `<p>Parece que você está bem no momento. Continue se cuidando!</p>`;
-        return;
+        if (maiorPontuacao === 0) {
+          resultadoDiv.innerHTML = "<p>Seu teste não indicou sinais de risco relevantes. Recomendamos continuar se observando e buscar ajuda se sentir necessidade.</p>";
+        } else {
+          const lista = transtornosMaisProvaveis.map(t => `<li><strong>${t}</strong> - <a href="${t.toLowerCase()}.html" target="_blank">Ver mais</a></li>`).join('');
+          resultadoDiv.innerHTML = `
+            <h2>Resultado do Teste:</h2>
+            <p>Com base nas suas respostas, os transtornos mais prováveis são:</p>
+            <ul style="list-style: none; padding: 0;">${lista}</ul>
+            <p>Lembre-se: este resultado não substitui uma avaliação profissional.</p>
+          `;
+        }
+      } else {
+        alert("Palavra-chave incorreta.");
       }
-
-      const transtornosMaisProvaveis = Object.keys(pontos).filter(t => pontos[t] === maiorPontuacao);
-
-      resultadoDiv.innerHTML = `<p>Você apresentou mais sinais de: <strong>${transtornosMaisProvaveis.join(", ")}</strong></p>` +
-        transtornosMaisProvaveis.map(t => `<a href="${t.toLowerCase().replace(' ', '-')}.html">Ver mais sobre ${t}</a>`).join("<br>");
     }
 
-    // Início
-    embaralhar(perguntas);
     mostrarPergunta();
   </script>
 </body>
